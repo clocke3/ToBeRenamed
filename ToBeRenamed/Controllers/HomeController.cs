@@ -5,13 +5,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ToBeRenamed.Models;
+using ToBeRenamed.Repositories;
 
 namespace ToBeRenamed.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ItemRepository _itemRepository;
+
+        public HomeController(ItemRepository itemRepository)
+        {
+            _itemRepository = itemRepository;
+        }
+
         public IActionResult Index()
         {
+            ViewData["Items"] = _itemRepository.GetAllItems();
+
             return View();
         }
 
