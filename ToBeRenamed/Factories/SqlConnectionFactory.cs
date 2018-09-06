@@ -10,7 +10,7 @@ namespace ToBeRenamed.Factories
 
         public SqlConnectionFactory(IConfiguration configuration)
         {
-            _connectionString = configuration["ConnectionString"];
+            _connectionString = configuration["ConnectionStrings:DefaultConnection"];
         }
 
         public IDbConnection GetSqlConnection()
