@@ -16,11 +16,23 @@ namespace ToBeRenamed.Database
                 .Build();
 
             var connectionString = configuration["ConnectionStrings:DefaultConnection"];
+            var testConnectionString = configuration["ConnectionStrings:TestConnection"];
 
             if (string.IsNullOrEmpty(connectionString))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: No connection string provided");
+                Console.WriteLine("Error: Invalid default connection string provided");
+                Console.ResetColor();
+#if DEBUG
+                Console.ReadLine();
+#endif
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(testConnectionString))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error: Invalid test connection string provided");
                 Console.ResetColor();
 #if DEBUG
                 Console.ReadLine();
@@ -29,7 +41,8 @@ namespace ToBeRenamed.Database
             }
 
             EnsureDatabase.For.PostgresqlDatabase(connectionString);
-
+            EnsureDatabase.For.PostgresqlDatabase(testConnectionString);
+            
             var upgrader = DeployChanges.To
                 .PostgresqlDatabase(connectionString)
                 .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
@@ -37,11 +50,32 @@ namespace ToBeRenamed.Database
                 .Build();
 
             var result = upgrader.PerformUpgrade();
+            
+            
+            var testUpgrader = DeployChanges.To
+                .PostgresqlDatabase(testConnectionString)
+                .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+                .LogToConsole()
+                .Build();
 
-            if (!result.Successful)
+            var testResult = testUpgrader.PerformUpgrade();
+            
+            if (!result.Successful/*!testResult.Successful*/)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Error);
+                //Console.WriteLine(testResult.Error);
+                Console.ResetColor();
+#if DEBUG
+                Console.ReadLine();
+#endif
+                return -1;
+            }
+
+            if (!testResult.Successful)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(testResult.Error);
                 Console.ResetColor();
 #if DEBUG
                 Console.ReadLine();

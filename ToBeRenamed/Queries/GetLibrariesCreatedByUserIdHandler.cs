@@ -10,9 +10,9 @@ namespace ToBeRenamed.Queries
 {
     public class GetLibrariesCreatedByUserIdHandler : IRequestHandler<GetLibrariesCreatedByUserId, IEnumerable<LibraryDto>>
     {
-        private readonly SqlConnectionFactory _sqlConnectionFactory;
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-        public GetLibrariesCreatedByUserIdHandler(SqlConnectionFactory sqlConnectionFactory)
+        public GetLibrariesCreatedByUserIdHandler(ISqlConnectionFactory sqlConnectionFactory)
         {
             _sqlConnectionFactory = sqlConnectionFactory;
         }

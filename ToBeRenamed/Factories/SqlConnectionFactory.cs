@@ -4,7 +4,7 @@ using System.Data;
 
 namespace ToBeRenamed.Factories
 {
-    public class SqlConnectionFactory
+    public class SqlConnectionFactory : ISqlConnectionFactory
     {
         private readonly string _connectionString;
 
