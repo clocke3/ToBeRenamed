@@ -18,6 +18,9 @@ namespace ToBeRenamed.Tests
             {
                 "plum",
                 "public"
+            },TablesToIgnore = new[]
+            {
+                "users"
             },
             DbAdapter = DbAdapter.Postgres
         };
@@ -27,13 +30,25 @@ namespace ToBeRenamed.Tests
         [Fact]
         public async void Test1()
         {
+            // Get test connection string
             var configuration = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
                .AddJsonFile("appsettings.json")
                .Build();
 
             var connFactory = new TestSqlConnectionFactory(configuration);
+            
+            // Insert user
+            const string insertUserSql = @"
+                INSERT INTO plum.users (display_name, google_claim_nameidentifier)
+                VALUES (1, 1)";
 
+            using (var cnn = connFactory.GetSqlConnection())
+            {
+                await cnn.ExecuteAsync(insertUserSql);
+            }
+
+            // Reset DB to checkpoint
             using (var conn = connFactory.GetSqlConnection())
             {
                 await conn.OpenAsync();
@@ -41,63 +56,16 @@ namespace ToBeRenamed.Tests
                 await checkpoint.Reset(conn);
             }
             
-//            var createLibrary = new CreateLibrary(1, "xUnitTitle", "xUnitDesc");
-//            var createLibraryHandler = new CreateLibraryHandler(connFactory);
-//
-//            await createLibraryHandler.Handle(createLibrary, new System.Threading.CancellationToken());
+            // Insert library into database
+            var createLibrary = new CreateLibrary(1, "xUnitTitle", "xUnitDesc");
+            var createLibraryHandler = new CreateLibraryHandler(connFactory);
 
-            const string sql2 = @"
-                INSERT INTO plum.users (display_name, google_claim_nameidentifier)
-                VALUES (1, 1)";
-
-            using (var cnn = connFactory.GetSqlConnection())
-            {
-                await cnn.ExecuteAsync(sql2);
-            }
+            await createLibraryHandler.Handle(createLibrary, new System.Threading.CancellationToken());
             
-            var userId = 16;
+            // Get library from database
+            var userId = 1;
             var title = "xUnitTitle";
             var description = "xUnitDesc";
-
-            const string sql = @"
-                INSERT INTO plum.libraries (title, description, created_by)
-                VALUES (@title, @description, @userId)";
-
-            using (var cnn = connFactory.GetSqlConnection())
-            {
-                await cnn.ExecuteAsync(sql, new { userId, title, description });
-            }
-        }
-        
-        [Fact]
-        public async void Test2()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var connFactory = new TestSqlConnectionFactory(configuration);
-
-            using (var conn = connFactory.GetSqlConnection())
-            {
-                await conn.OpenAsync();
-                
-                await checkpoint.Reset(conn);
-            }
-            
-            const string sql2 = @"
-                INSERT INTO plum.users (display_name, google_claim_nameidentifier)
-                VALUES (1, 1)";
-
-            using (var cnn = connFactory.GetSqlConnection())
-            {
-                await cnn.ExecuteAsync(sql2);
-            }
-            
-            var userId = 17;
-            var title = "xUnitTitle2";
-            var description = "xUnitDesc2";
 
             const string sql = @"
                 INSERT INTO plum.libraries (title, description, created_by)

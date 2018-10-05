@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
-using System.Data;
+using System.Data.Common;
 
 namespace ToBeRenamed.Factories
 {
@@ -13,7 +13,7 @@ namespace ToBeRenamed.Factories
             _connectionString = configuration["ConnectionStrings:DefaultConnection"];
         }
 
-        public IDbConnection GetSqlConnection()
+        public DbConnection GetSqlConnection()
         {
             return new NpgsqlConnection(_connectionString);
         }

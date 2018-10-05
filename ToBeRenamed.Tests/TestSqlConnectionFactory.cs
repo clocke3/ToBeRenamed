@@ -6,8 +6,7 @@ using ToBeRenamed.Factories;
 
 namespace ToBeRenamed.Tests
 {
-    // TODO change back to implement IDbConnection
-    public class TestSqlConnectionFactory
+    public class TestSqlConnectionFactory : ISqlConnectionFactory
     {
         private readonly string _connectionString;
 
