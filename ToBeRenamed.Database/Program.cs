@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Dapper;
 using DbUp;
 using Microsoft.Extensions.Configuration;
 
@@ -9,11 +10,30 @@ namespace ToBeRenamed.Database
     public class Program
     {
         public static int Main(string[] args)
-        { 
+        {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
+
+            if (!string.IsNullOrEmpty(args[0]) && args[0].Equals("delete"))
+            {
+                var connFactory = new PostgresSqlConnectionFactory(configuration);
+
+                const string dropDatabases = @"
+                    DROP DATABASE IF EXISTS ""Plum"";
+                    DROP DATABASE IF EXISTS ""TestPlum"";";
+
+                using (var cnn = connFactory.GetSqlConnection())
+                {
+                    // Insert new user, then get the user id
+                    cnn.Execute(dropDatabases);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Databases successfully dropped!");
+                    Console.ResetColor();
+                }
+            }
+
 
             var connectionString = configuration["ConnectionStrings:DefaultConnection"];
             var testConnectionString = configuration["ConnectionStrings:TestConnection"];
